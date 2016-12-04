@@ -35,6 +35,7 @@ ReactDOM.render(<Welcome name="React"/>,document.getElementById('app'));
 ------------------------------------------------------------------------------------*/
 
 /* ------------------------------------------------------------------------------------props介绍
+//组件中的props是一种父级向子级传递数据的方式.
 // ES6 语法
 class HelloMessage extends React.Component{
 	// 若是需要绑定 this.方法或是需要在 constructor 使用 props，定义 state，就需要 constructor。
@@ -120,4 +121,188 @@ class Timer extends React.Component {
 ReactDOM.render(<Timer />, document.getElementById('app'));
 ----------------------------------------------------------------------------------------------*/
 
-// 事件处理
+/*-----------------------------------------------------------------------------------------------事件处理
+// TodoApp元件中包含了显示Todo的TodoList元件，Todo的内容透过props传入TodoList中。
+// 由于TodoList仅单纯Render UI不涉及内部state操作是stateless component，所以使用Functional Component写法。
+// 需要特别注意的是这边我们用map function来迭代Todos，
+// 需要留意的是每个迭代的元素必须要有unique key不然会发生错误（可以用自定义id，或是使用map function的第二个参数index）
+const  TodoList  = ( props ) => (
+     < ul >
+        {
+            props . items . map (( item ) => (
+                 < li key = { item . id } > { item . text } < / li >
+            ))
+        }
+    < / ul >
+);
+
+//整个App的主要元件，这边比较重要的是事件处理的部份
+class TodoApp extends React.Component{
+    constructor(props){
+        super(props);
+        this.onChange = this.onChange.bind(this);
+        this.handleSubmit = this.handleSubmit.bind(this);
+        this.state = {
+            items:[],
+            text:'',
+        }
+    }
+
+    onChange(e){
+        this.setState({text:e.target.value});
+    }
+    handleSubmit(e){
+        e.preventDefault();
+        alert('yes')
+        const nextItems = this.state.items.concat([{text:this.state.text,id:Date.now()}]);
+        const nextText = '';
+        this.setState({items:nextItems,text:nextText});
+    }
+    render(){
+        return(
+            <div>
+            <h3>TODO</h3>
+            <TodoList items={this.state.items}/>
+            <form onSubmit={this.handleSubmit}>
+                <input onChange={this.onChange} value={this.state.text}/>
+                <button>{'Add #'+(this.state.items.length+1)}</button>
+            </form>
+            </div>
+        );
+    }
+}
+
+ReactDOM.render( <TodoApp /> , document.getElementById ( 'app' ));
+-----------------------------------------------------------------------------------------------*/
+
+/*-----------------------------------------------------------------------------------------------
+
+// Refs 与表单处理
+// 需要从组件获取真实 DOM 的节点，这时就要用到 ref 属性
+// this.refs.[refName] 就会返回这个真实的 DOM 节点
+class MarkdownEditor extends React.Component{
+    constructor(props){
+        super(props);
+        this.handleChange = this.handleChange.bind(this);
+        this.rawMarkup = this.rawMarkup.bind(this);
+        this.state = {
+            value:'Type some *markedown* here!',
+        }
+    }
+
+    handleChange(){
+        //this.refs.textarea获取真实DOM才能取得用户的输入，虚拟DOM是不行的
+        this.setState({value:this.refs.textarea.value});
+    }
+    //将使用者输入的Markdown语法parse成HTML放入DOM中，React通常使用virtual DOM作为和DOM沟通的中介，
+    //不建议直接操作DOM。故使用时的属性为dangerouslySetInnerHTML 
+    rawMarkup(){
+        const md = new Remarkable();
+        return {__html:md.render(this.state.value)};
+    }
+
+    render(){
+        return(
+            <div className="MarkdownEditor">
+            <h3>Input</h3>
+            <textarea
+                onChange={this.handleChange}
+                ref="textarea"
+                defaultValue={this.state.value}/>
+            <h3>Output</h3>
+            <div
+                className="content"
+                dangerouslySetInnerHTML={this.rawMarkup()}/>
+            </div>
+
+        );
+    }
+}
+
+ReactDOM.render(<MarkdownEditor/>,document.getElementById('app'));
+-----------------------------------------------------------------------------------------------*/
+
+/*-----------------------------------------------------------------------------------------------
+//Component 生命周期展示
+class MyComponent extends React.Component{
+    constructor(props){
+        super(props);
+        console.log('constructor');
+        this.handleClick = this.handleClick.bind(this);
+        this.state = {
+            name:'Cshine',
+        }
+    }
+    handleClick(){
+        this.setState({name:'CC'});
+    }
+    componentWillMount(){
+        console.log('componentWillMount');
+    }
+    componentDidMount(){
+        console.log('componentDidMount')
+    }
+    componentWillReciveProps(){
+        console.log('componentWillReciveProps');
+    }
+    shouldComponentUpdate(nextProps,nextState){
+        console.log('shouldComponentUpdate');
+        return true;
+    }
+    componentWillUpdate(){
+        console.log('componentWillUpdate');
+    }
+    componentDidUpdate(){
+        console.log('componentDidUpdate');
+    }
+    componentWillUnmount(){
+        console.log('componentWillUnmount');
+    }
+    render(){
+        return(
+            <div onClick={this.handleClick}>Hi,{this.state.name}</div>
+        );
+    }
+}
+
+ReactDOM.render(<MyComponent/>,document.getElementById('app'));
+----------------------------------------------------------------------------------------------*/
+
+//Ajax 非同步处理
+//组件的数据来源，通常是通过 Ajax 请求从服务器获取，
+//可以使用 componentDidMount 方法设置 Ajax 请求，等到请求成功，再用 this.setState 方法重新渲染 UI 
+//若有需要进行Ajax非同步处理，请在componentDidMount进行处理。以下透过jQuery执行Ajax取得Github API
+class UserGithub extends React.Component{
+    constructor(props){
+        super(props);
+        this.state = {
+            username:'',
+            githubUrl:'',
+            avatarUrl:'',
+        }
+    }
+    componentDidMount(){
+        $.get(this.props.source,(result)=>{
+            console.log(result);
+            const data = result;
+            if(data){
+                this.setState({
+                    username:data.name,
+                    githubUrl:data.html_url,
+                    avatarUrl:data.avatar_url
+                });
+            }
+        });
+    }
+    render(){
+        return(
+            <div>
+            <h3>{this.state.username}</h3>
+            <img src={this.state.avatarUrl}/>
+            <a href={this.state.githubUrl}>Github Link</a>
+            </div>
+        );
+    }
+}
+
+ReactDOM.render(<UserGithub source="https://api.github.com/users/Cccshine"/>,document.getElementById('app'));
