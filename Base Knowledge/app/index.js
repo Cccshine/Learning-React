@@ -268,6 +268,7 @@ class MyComponent extends React.Component{
 ReactDOM.render(<MyComponent/>,document.getElementById('app'));
 ----------------------------------------------------------------------------------------------*/
 
+/*----------------------------------------------------------------------------------------------
 //Ajax 非同步处理
 //组件的数据来源，通常是通过 Ajax 请求从服务器获取，
 //可以使用 componentDidMount 方法设置 Ajax 请求，等到请求成功，再用 this.setState 方法重新渲染 UI 
@@ -306,3 +307,6 @@ class UserGithub extends React.Component{
 }
 
 ReactDOM.render(<UserGithub source="https://api.github.com/users/Cccshine"/>,document.getElementById('app'));
+------------------------------------------------------------------------------------------------------------*/
+
+
