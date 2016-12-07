@@ -12,4 +12,10 @@ ReactDOM.render(
 	<Router history={hashHistory}>
 		<Route path="/" component={App}>
 			<IndexRoute component={Home}>
-) 
+			<Route path="/repos/:name" component={Repos}/>
+			<Route path="/about" component={About}/>
+			<Route path="/user" component={User}/>
+			<Route path="/contacts" component={Contacts}/>
+		</Route>
+	</Router>, document.getElementById('app')
+);
