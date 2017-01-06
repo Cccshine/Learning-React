@@ -34,7 +34,7 @@ class TodoList extends Component{
 		TodoStore.setIndex(event.target.dataset.index);
 		var oList = document.getElementById('list');
 		var items = oList.getElementsByTagName('li');
-		for (let i in items) {
+		for (let i=0;i<items.length;i++) {
 			items[i].style.color = '#000';
 			items[i].style.background = '#fff';
 		}
